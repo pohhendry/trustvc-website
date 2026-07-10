@@ -47,6 +47,19 @@ if (!File.prototype.text) {
   }
 }
 
+// processFile now reads raw bytes to sniff for the PDF header before choosing
+// the JSON vs Verifiable-PDF path; jsdom's File lacks arrayBuffer, browsers have it.
+if (!File.prototype.arrayBuffer) {
+  File.prototype.arrayBuffer = function () {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as ArrayBuffer)
+      reader.onerror = () => reject(reader.error)
+      reader.readAsArrayBuffer(this)
+    })
+  }
+}
+
 vi.mock('@trustvc/trustvc', async importOriginal => {
   const actual = await importOriginal<typeof import('@trustvc/trustvc')>()
   const mkChain = (

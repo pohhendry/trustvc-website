@@ -4,6 +4,7 @@ import { ActionLoader } from './ActionLoader'
 import NetworkModal from './NetworkModal'
 import VerifyResult from './VerifyResult'
 import VerifyError from './VerifyError'
+import CarrierPanel from './CarrierPanel'
 import EndorsementChain from '../EndorsementChain'
 import { useEndorsementChain } from '../EndorsementChain/useEndorsementChain'
 import Spinner from '../../icons/Spinner'
@@ -47,6 +48,7 @@ const VerifySection: React.FC<VerifySectionProps> = ({ isDarkMode }) => {
     tokenId,
     keyId,
     rawDocument,
+    carrier,
     getGroupStatus,
     handleDrag,
     handleDrop,
@@ -125,7 +127,7 @@ const VerifySection: React.FC<VerifySectionProps> = ({ isDarkMode }) => {
         <input
           id="file-upload"
           type="file"
-          accept=".json,.tt,.oa"
+          accept=".json,.tt,.oa,.pdf"
           onChange={handleFileInput}
           style={{ display: 'none' }}
         />
@@ -202,6 +204,9 @@ const VerifySection: React.FC<VerifySectionProps> = ({ isDarkMode }) => {
                   onReset={handleReset}
                 />
               )}
+              {(verifyStatus === 'valid' ||
+                verifyStatus === 'invalid' ||
+                verifyStatus === 'error') && <CarrierPanel carrier={carrier} />}
               {verifyStatus === 'network-select' && (
                 <NetworkModal
                   isDarkMode={isDarkMode}

@@ -20,6 +20,11 @@ import {
   errorMessages,
 } from '@trustvc/trustvc'
 import { getRpcUrl, getIsExpired } from '../../../utils/helper'
+import {
+  checkVerifiablePdf,
+  isPdf,
+  type CarrierCheck,
+} from '../../../utils/verifiablePdf'
 import { useDocumentContext } from '../../common/contexts/DocumentContext'
 import { type VerifyErrorType, getErrorTypeFromError } from './verifyErrorUtils'
 import {
@@ -83,6 +88,7 @@ export interface UseVerifyReturn {
   tokenId?: string
   keyId?: string
   rawDocument?: unknown
+  carrier: CarrierCheck | null
   getGroupStatus: (_type: string) => 'VALID' | 'INVALID'
   handleDrag: (_e: React.DragEvent) => void
   handleDrop: (_e: React.DragEvent) => void
@@ -509,6 +515,9 @@ export const useVerify = (): UseVerifyReturn => {
   const [keyId, setKeyId] = useState<string | undefined>(undefined)
   const [rawDocument, setRawDocument] = useState<unknown>(undefined)
   const [isExpired, setIsExpired] = useState<boolean>(false)
+  // Carrier-level check for Verifiable PDFs (the embedded-credential + visual-layer
+  // integrity verification this site performs, separate from the TrustVC fragments).
+  const [carrier, setCarrier] = useState<CarrierCheck | null>(null)
   const runVerification = async (
     doc: unknown,
     chainId: string | null | undefined,
@@ -636,6 +645,7 @@ export const useVerify = (): UseVerifyReturn => {
     setKeyId(undefined)
     setRawDocument(undefined)
     setErrorMessage(undefined)
+    setCarrier(null)
     setTokenRegistryAddressContext(null)
     setTokenRegistryVersionContext(null)
     setTokenIdContext(null)
@@ -657,8 +667,40 @@ export const useVerify = (): UseVerifyReturn => {
 
     let parsedDoc: any
     try {
-      const text = await file.text()
-      parsedDoc = JSON.parse(text)
+      const bytes = new Uint8Array(await file.arrayBuffer())
+      if (isPdf(bytes)) {
+        // Verifiable PDF: extract the embedded credential and run the carrier
+        // (visual-layer integrity) check before handing the credential to the
+        // existing TrustVC pipeline. Non-PDFs fall through to the JSON path below,
+        // byte-identical to the pre-patch behavior.
+        const carrierResult = await checkVerifiablePdf(bytes)
+        if (!carrierResult.hasCredential) {
+          clearVerificationMetadata()
+          setCarrier(carrierResult)
+          setErrorType(errorMessages.TYPES.INVALID)
+          setErrorMessage(
+            'This is a regular PDF — no embedded credential was found.'
+          )
+          setVerifyStatus('error')
+          trackDocumentVerifyError(undefined, errorMessages.TYPES.INVALID)
+          return
+        }
+        if (carrierResult.error === 'EMBEDDED_CREDENTIAL_CORRUPTED') {
+          clearVerificationMetadata()
+          setCarrier(carrierResult)
+          setErrorType(errorMessages.TYPES.INVALID)
+          setErrorMessage('The embedded credential in this PDF is corrupted.')
+          setVerifyStatus('error')
+          trackDocumentVerifyError(undefined, errorMessages.TYPES.INVALID)
+          return
+        }
+        setCarrier(carrierResult)
+        parsedDoc = carrierResult.vc
+      } else {
+        setCarrier(null)
+        const text = new TextDecoder().decode(bytes)
+        parsedDoc = JSON.parse(text)
+      }
       // Prefer the document's own chain; fall back to its embedded network field
       // (getChainId ignores that for DNS-DID/DID docs, which can still use a
       // REVOCATION_STORE on that chain) before asking the user to pick one.
@@ -818,6 +860,7 @@ export const useVerify = (): UseVerifyReturn => {
     tokenId,
     keyId,
     rawDocument,
+    carrier,
     getGroupStatus,
     handleDrag,
     handleDrop,
