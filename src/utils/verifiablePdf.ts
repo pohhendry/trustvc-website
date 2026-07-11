@@ -35,7 +35,10 @@ async function digestHex(bytes: Uint8Array): Promise<string> {
 async function extractVc(
   bytes: Uint8Array
 ): Promise<{ vc: any; raw: Uint8Array } | null> {
-  const loadingTask = pdfjs.getDocument({ data: bytes.slice() })
+  const loadingTask = pdfjs.getDocument({
+    data: bytes.slice(),
+    isEvalSupported: false,
+  })
   const doc = await loadingTask.promise
   try {
     // pdfjs-dist v6: getAttachments() returns a Map<string, { filename, rawFilename,
