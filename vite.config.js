@@ -113,7 +113,13 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       setupFiles: './src/setupTests.ts',
       css: true,
-      exclude: ['**/node_modules/**', '**/e2e/**'],
+      // verifiablePdf.test.ts drives the real pdfjs worker and needs extra deps
+      // inlining + fixtures wiring; it runs under its own vitest.pdf.config.ts.
+      exclude: [
+        '**/node_modules/**',
+        '**/e2e/**',
+        '**/verifiablePdf.test.ts',
+      ],
     }
   }
 })

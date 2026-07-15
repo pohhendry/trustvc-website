@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: trustvc-verifier
+    runtime: static
+    buildCommand: npm ci --include=dev && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_MINIMAL_VERIFIER
+        value: 'true'
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

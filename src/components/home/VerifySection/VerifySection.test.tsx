@@ -36,6 +36,7 @@ const defaultHook: UseVerifyReturn = {
   isExpired: false,
   tokenRegistryVersion: null,
   tags: [],
+  carrier: null,
   getGroupStatus: vi.fn().mockReturnValue('VALID' as const),
   handleDrag: vi.fn(),
   handleDrop: vi.fn(),
@@ -304,6 +305,21 @@ describe('VerifySection', () => {
         'noopener,noreferrer'
       )
       openSpy.mockRestore()
+    })
+
+    it('does not render the demo CTA when showDemoCta is false', () => {
+      render(<VerifySection isDarkMode={false} showDemoCta={false} />)
+      expect(
+        screen.queryByText(/Try our demo document!/i)
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByText(/Visit Document Gallery/i)
+      ).not.toBeInTheDocument()
+    })
+
+    it('renders the demo CTA by default when showDemoCta is not passed', () => {
+      render(<VerifySection isDarkMode={false} />)
+      expect(screen.getByText(/Try our demo document!/i)).toBeInTheDocument()
     })
   })
 })
