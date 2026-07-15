@@ -4,6 +4,9 @@ services:
     runtime: static
     buildCommand: npm ci --include=dev && npm run build
     staticPublishPath: dist
+    envVars:
+      - key: VITE_MINIMAL_VERIFIER
+        value: 'true'
     routes:
       - type: rewrite
         source: /*
