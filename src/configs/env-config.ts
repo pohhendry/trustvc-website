@@ -9,3 +9,5 @@ export const INFURA_API_KEY = process.env.INFURA_API_KEY
 export const NETWORK_NAME = IS_TESTNET ? 'sepolia' : 'mainnet'
 export const MAGIC_API_KEY =
   (import.meta.env?.VITE_MAGIC_API_KEY as string | undefined) || ''
+export const IS_MINIMAL_VERIFIER =
+  String(import.meta.env?.VITE_MINIMAL_VERIFIER || '').toLowerCase() === 'true'
