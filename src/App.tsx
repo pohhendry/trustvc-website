@@ -3,6 +3,8 @@ import { matchPath, useLocation } from 'react-router-dom'
 import Navbar from './components/common/Navbar'
 import AppRouter from './routes'
 import { GoogleTagManager } from './components/common/GoogleTagManager'
+import { IS_MINIMAL_VERIFIER } from './configs/env-config'
+import MinimalVerifierApp from './components/minimal-verifier'
 
 const GTM_CONTAINER_ID = import.meta.env.VITE_GTM_CONTAINER_ID as
   | string
@@ -64,6 +66,10 @@ function App() {
       document.body.classList.remove('dark-mode')
     }
   }, [isDarkMode])
+
+  if (IS_MINIMAL_VERIFIER) {
+    return <MinimalVerifierApp />
+  }
 
   const matchedBackgroundRule = BACKGROUND_ROUTE_RULES.find(rule =>
     rule.paths.some(path => Boolean(matchPath(path, location.pathname)))
