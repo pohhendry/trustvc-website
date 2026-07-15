@@ -16,6 +16,7 @@ import { ButtonSize, LabelButton } from '../../../components/common/Button'
 
 interface VerifySectionProps {
   isDarkMode: boolean
+  showDemoCta?: boolean
 }
 
 const CHAIN_NAMES: Record<string, string> = {
@@ -31,7 +32,10 @@ const CHAIN_NAMES: Record<string, string> = {
   '21002': 'Astron Testnet',
 }
 
-const VerifySection: React.FC<VerifySectionProps> = ({ isDarkMode }) => {
+const VerifySection: React.FC<VerifySectionProps> = ({
+  isDarkMode,
+  showDemoCta = true,
+}) => {
   const {
     verifyStatus,
     fileName,
@@ -215,40 +219,44 @@ const VerifySection: React.FC<VerifySectionProps> = ({ isDarkMode }) => {
                   onCancel={handleNetworkCancel}
                 />
               )}
-              <div className="demo-button">
-                <div className="demo-content">
-                  <div className="demo-text-wrapper">
-                    <div className="demo-heading">Try our demo document!</div>
-                  </div>
-                  <div className="demo-description-wrapper">
-                    <div className="demo-description">
-                      Experience the interoperability of our documents from the
-                      documents gallery!
+              {showDemoCta && (
+                <div className="demo-button">
+                  <div className="demo-content">
+                    <div className="demo-text-wrapper">
+                      <div className="demo-heading">Try our demo document!</div>
                     </div>
-                  </div>
-                </div>
-                <div className="cta-button-wrapper">
-                  <button
-                    type="button"
-                    className="cta-button"
-                    onClick={() =>
-                      window.open(
-                        'https://gallery.tradetrust.io',
-                        '_blank',
-                        'noopener,noreferrer'
-                      )
-                    }
-                  >
-                    <div className="cta-boundary">
-                      <div className="cta-padding" />
-                      <div className="cta-text-frame">
-                        <div className="cta-label">Visit Document Gallery</div>
+                    <div className="demo-description-wrapper">
+                      <div className="demo-description">
+                        Experience the interoperability of our documents from
+                        the documents gallery!
                       </div>
-                      <div className="cta-padding" />
                     </div>
-                  </button>
+                  </div>
+                  <div className="cta-button-wrapper">
+                    <button
+                      type="button"
+                      className="cta-button"
+                      onClick={() =>
+                        window.open(
+                          'https://gallery.tradetrust.io',
+                          '_blank',
+                          'noopener,noreferrer'
+                        )
+                      }
+                    >
+                      <div className="cta-boundary">
+                        <div className="cta-padding" />
+                        <div className="cta-text-frame">
+                          <div className="cta-label">
+                            Visit Document Gallery
+                          </div>
+                        </div>
+                        <div className="cta-padding" />
+                      </div>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
